@@ -6,35 +6,18 @@ const {
 } = require("electron");
 const fs = require("fs");
 
-
-let mainWindow = null;
+const window = new Set()
 
 app.on("ready", () => {
-    mainWindow = new BrowserWindow({
-        show: false,
-        webPreferences: {
-            nodeIntegration: true, // 启用 Node.js 集成
-            contextIsolation: false, // 禁用上下文隔离（否则仍无法访问）
-        },
-    });
+    createWindow()
+})
 
-    mainWindow.loadFile("app/index.html");
-
-    // show the window when ready
-    mainWindow.once("ready-to-show", () => {
-        mainWindow.show();
-    });
-
-    mainWindow.on("closed", () => {
-        mainWindow = null;
-    });
-});
-
-const getFileFromUser = async () => {
+// 打开文件
+const getFileFromUser = async (targetWindow) => {
     const {
         canceled,
         filePaths
-    } = await dialog.showOpenDialog(mainWindow, {
+    } = await dialog.showOpenDialog(targetWindow, {
         properties: ["openFile"],
         filters: [{
                 name: "Markdown",
@@ -53,20 +36,45 @@ const getFileFromUser = async () => {
     return file;
 };
 
+const createWindow = () => {
+    const win = new BrowserWindow({
+        width: 800,
+        height: 600,
+        show: false,
+        webPreferences: {
+            nodeIntegration: true, // 启用 Node.js 集成
+            contextIsolation: false, // 禁用上下文隔离（否则仍无法访问）
+        },
+    })
+    win.loadFile("app/index.html");
+    win.on("ready-to-show", () => {
+        win.show();
+    });
+    win.on("closed", () => {
+        window.delete(win)
+    })
+    window.add(win)
+}
+
 
 // 打开文件
 ipcMain.handle('open-file', async (event) => {
     // ...你的 getFileFromUser 逻辑...
-    const file = await getFileFromUser();
+    console.log(event)
+    const file = await getFileFromUser(event.sender);
+    if (!file) return null;
     const content = fs.readFileSync(file).toString();
-    // 返回内容
     return {
         file,
         content
     }
 });
-
+//新文件
+ipcMain.handle('new-file', async (event) => {
+    createWindow()
+})
 
 module.exports = {
-    getFileFromUser
+    getFileFromUser,
+    createWindow
 }

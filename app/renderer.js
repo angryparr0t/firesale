@@ -4,11 +4,13 @@ const {
 } = require('marked');
 
 const {
-    ipcRenderer
+    ipcRenderer,
+    remote
 } = require('electron')
 //获取DOM元素
 const markdownView = document.querySelector('#markdown');
 const htmlView = document.querySelector('#html');
+const newFileButton = document.querySelector('#new-file');
 const openFileButton = document.querySelector('#open-file');
 const saveFileButton = document.querySelector('#save-file');
 
@@ -19,7 +21,11 @@ const rendererMarkdownToHTML = (markdown) => {
 markdownView.addEventListener('keyup', () => {
     rendererMarkdownToHTML(markdownView.value);
 });
-
+//新文件
+newFileButton.addEventListener('click', async () => {
+    const result = await ipcRenderer.invoke('new-file');
+});
+//打开文件
 openFileButton.addEventListener('click', async () => {
     const result = await ipcRenderer.invoke('open-file');
     if (result) {
