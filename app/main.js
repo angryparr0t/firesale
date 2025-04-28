@@ -37,6 +37,15 @@ const getFileFromUser = async (targetWindow) => {
 };
 
 const createWindow = () => {
+    let x, y;
+    const currentWindow = BrowserWindow.getAllWindows()[0];
+    if (currentWindow) {
+        //position=[x,y] currentWindow.getPosition()返回的是一个数组
+        const position = currentWindow.getPosition();
+        x = position[0] + 30;
+        y = position[1] + 30;
+    }
+
     const win = new BrowserWindow({
         width: 800,
         height: 600,
@@ -45,15 +54,24 @@ const createWindow = () => {
             nodeIntegration: true, // 启用 Node.js 集成
             contextIsolation: false, // 禁用上下文隔离（否则仍无法访问）
         },
-    })
+    });
+
     win.loadFile("app/index.html");
-    win.on("ready-to-show", () => {
+
+    // 确保在窗口显示前设置好位置
+    win.once('ready-to-show', () => {
+        if (x && y) {
+            win.setPosition(x, y);
+        }
         win.show();
     });
+
     win.on("closed", () => {
-        window.delete(win)
-    })
-    window.add(win)
+        window.delete(win);
+    });
+
+    window.add(win);
+    return win;
 }
 
 
