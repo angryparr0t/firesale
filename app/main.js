@@ -6,11 +6,27 @@ const {
 } = require("electron");
 const fs = require("fs");
 
-const window = new Set()
+const window = new Set();
 
 app.on("ready", () => {
-    createWindow()
-})
+    createWindow();
+});
+
+app.on("window-all-closed", () => {
+    // 如果是macos，则不关闭
+    if (process.platform !== "darwin") {
+        return false;
+    }
+    //如果不是退出应用
+    app.quit();
+});
+
+app.on("activate", (event, hasVisibleWindows) => {
+    // 如果是macos没有可视窗口，就创建一个
+    if (!hasVisibleWindows) {
+        createWindow();
+    }
+});
 
 // 打开文件
 const getFileFromUser = async (targetWindow) => {
@@ -59,7 +75,7 @@ const createWindow = () => {
     win.loadFile("app/index.html");
 
     // 确保在窗口显示前设置好位置
-    win.once('ready-to-show', () => {
+    win.once("ready-to-show", () => {
         if (x && y) {
             win.setPosition(x, y);
         }
@@ -72,27 +88,26 @@ const createWindow = () => {
 
     window.add(win);
     return win;
-}
-
+};
 
 // 打开文件
-ipcMain.handle('open-file', async (event) => {
+ipcMain.handle("open-file", async (event) => {
     // ...你的 getFileFromUser 逻辑...
-    console.log(event)
+    console.log(event);
     const file = await getFileFromUser(event.sender);
     if (!file) return null;
     const content = fs.readFileSync(file).toString();
     return {
         file,
-        content
-    }
+        content,
+    };
 });
 //新文件
-ipcMain.handle('new-file', async (event) => {
-    createWindow()
-})
+ipcMain.handle("new-file", async (event) => {
+    createWindow();
+});
 
 module.exports = {
     getFileFromUser,
-    createWindow
-}
+    createWindow,
+};
