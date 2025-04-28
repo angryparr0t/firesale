@@ -14,7 +14,7 @@ app.on("ready", () => {
 
 app.on("window-all-closed", () => {
     // 如果是macos，则不关闭
-    if (process.platform !== "darwin") {
+    if (process.platform === "darwin") {
         return false;
     }
     //如果不是退出应用
@@ -93,7 +93,7 @@ const createWindow = () => {
 // 打开文件
 ipcMain.handle("open-file", async (event) => {
     // ...你的 getFileFromUser 逻辑...
-    console.log(event);
+    //console.log(event);
     const file = await getFileFromUser(event.sender);
     if (!file) return null;
     const content = fs.readFileSync(file).toString();
@@ -105,6 +105,11 @@ ipcMain.handle("open-file", async (event) => {
 //新文件
 ipcMain.handle("new-file", async (event) => {
     createWindow();
+});
+//设置标题
+ipcMain.handle("set-title", (event, title) => {
+    const currentWindow = BrowserWindow.getAllWindows()[0];
+    currentWindow.setTitle(title);
 });
 
 module.exports = {
