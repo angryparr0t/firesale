@@ -1,14 +1,8 @@
-//引入marked，用来把markdown转换为html
-const {
-    marked
-} = require('marked');
+// 使用预加载的 marked
+// const {
+//     marked
+// } = window.electronAPI;
 
-const {
-    ipcRenderer,
-    remote
-} = require('electron')
-
-const path = require('path');
 //追踪当前打开的文件
 let filepath = null;
 //追踪当前打开的文件内容
@@ -27,11 +21,11 @@ markdownView.addEventListener('keyup', () => {
 });
 //新文件
 newFileButton.addEventListener('click', async () => {
-    const result = await ipcRenderer.invoke('new-file');
+    const result = await window.electronAPI.newFile();
 });
 //打开文件
 openFileButton.addEventListener('click', async () => {
-    const result = await ipcRenderer.invoke('open-file');
+    const result = await window.electronAPI.openFile();
     if (result) {
         markdownView.value = result.content;
         rendererMarkdownToHTML(result.content);
@@ -42,12 +36,11 @@ openFileButton.addEventListener('click', async () => {
     }
 });
 const rendererMarkdownToHTML = (markdown) => {
-    htmlView.innerHTML = marked.parse(markdown);
+    htmlView.innerHTML = window.electronAPI.parseMarkdown(markdown);
 }
 const updateUserInterface = async () => {
     if (filepath) {
-        const title = `${path.basename(filepath)}-FireSale`;
-        await ipcRenderer.invoke('set-title', title);
+        await window.electronAPI.setTitle();
     }
 
 }

@@ -5,8 +5,10 @@ const {
     ipcMain
 } = require("electron");
 const fs = require("fs");
+const path = require("path");
 
 const window = new Set();
+let filepath = null; // 添加全局变量来存储当前文件路径
 
 app.on("ready", () => {
     createWindow();
@@ -67,12 +69,12 @@ const createWindow = () => {
         height: 600,
         show: false,
         webPreferences: {
-            nodeIntegration: true, // 启用 Node.js 集成
-            contextIsolation: false, // 禁用上下文隔离（否则仍无法访问）
+            preload: path.join(__dirname, 'preload.js'),
+            sandbox: false,
         },
     });
 
-    win.loadFile("app/index.html");
+    win.loadFile(path.join(__dirname, 'index.html'));
 
     // 确保在窗口显示前设置好位置
     win.once("ready-to-show", () => {
@@ -96,6 +98,7 @@ ipcMain.handle("open-file", async (event) => {
     //console.log(event);
     const file = await getFileFromUser(event.sender);
     if (!file) return null;
+    filepath = file; // 保存文件路径
     const content = fs.readFileSync(file).toString();
     return {
         file,
@@ -107,7 +110,8 @@ ipcMain.handle("new-file", async (event) => {
     createWindow();
 });
 //设置标题
-ipcMain.handle("set-title", (event, title) => {
+ipcMain.handle("set-title", (event) => {
+    const title = filepath ? `${path.basename(filepath)}-FireSale` : 'FireSale';
     const currentWindow = BrowserWindow.getAllWindows()[0];
     currentWindow.setTitle(title);
 });
