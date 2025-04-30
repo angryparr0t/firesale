@@ -13,6 +13,7 @@ const htmlView = document.querySelector('#html');
 const newFileButton = document.querySelector('#new-file');
 const openFileButton = document.querySelector('#open-file');
 const saveFileButton = document.querySelector('#save-file');
+const revertFileButton = document.querySelector('#revert-file');
 
 //监听markdown的变化
 markdownView.addEventListener('keyup', () => {
@@ -38,6 +39,12 @@ openFileButton.addEventListener('click', async () => {
         updateUserInterface(isEdit);
     }
 });
+//重置文件内容
+revertFileButton.addEventListener('click', () => {
+    markdownView.value = originContent;
+    rendererMarkdownToHTML(originContent);
+    updateUserInterface(false);
+});
 
 const rendererMarkdownToHTML = (markdown) => {
     htmlView.innerHTML = window.electronAPI.parseMarkdown(markdown);
@@ -46,5 +53,7 @@ const rendererMarkdownToHTML = (markdown) => {
 const updateUserInterface = async (isEdit) => {
     if (filepath) {
         await window.electronAPI.setTitle(filepath, isEdit);
+        saveFileButton.disabled = !isEdit;
+        revertFileButton.disabled = !isEdit;
     }
 };
