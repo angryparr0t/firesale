@@ -110,11 +110,17 @@ ipcMain.handle("new-file", async (event) => {
     createWindow();
 });
 //设置标题
-ipcMain.handle("set-title", (event) => {
-    const title = filepath ? `${path.basename(filepath)}-FireSale` : 'FireSale';
+ipcMain.handle("set-title", (event, filepath, isEdit) => {
+    let title;
+    if (isEdit) {
+        title = filepath ? `${path.basename(filepath)}-FireSale(Edited)` : 'FireSale(Edited)';
+    } else {
+        title = filepath ? `${path.basename(filepath)}-FireSale` : 'FireSale';
+    }
     const currentWindow = BrowserWindow.getAllWindows()[0];
     currentWindow.setTitle(title);
 });
+
 
 module.exports = {
     getFileFromUser,

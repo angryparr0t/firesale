@@ -9,6 +9,6 @@ const marked = require("marked");
 contextBridge.exposeInMainWorld("electronAPI", {
     openFile: () => ipcRenderer.invoke("open-file"),
     newFile: () => ipcRenderer.invoke("new-file"),
-    setTitle: () => ipcRenderer.invoke("set-title"),
+    setTitle: (filepath, isEdit) => ipcRenderer.invoke("set-title", filepath, isEdit),
     parseMarkdown: (markdown) => marked.parse(markdown)
 });

@@ -14,33 +14,37 @@ const newFileButton = document.querySelector('#new-file');
 const openFileButton = document.querySelector('#open-file');
 const saveFileButton = document.querySelector('#save-file');
 
-
 //监听markdown的变化
 markdownView.addEventListener('keyup', () => {
+    const currentContent = markdownView.value;
     rendererMarkdownToHTML(markdownView.value);
+    updateUserInterface(currentContent !== originContent);
 });
+
 //新文件
 newFileButton.addEventListener('click', async () => {
     const result = await window.electronAPI.newFile();
 });
+
 //打开文件
 openFileButton.addEventListener('click', async () => {
+    const isEdit = false;
     const result = await window.electronAPI.openFile();
     if (result) {
         markdownView.value = result.content;
         rendererMarkdownToHTML(result.content);
-        // 你可以把 result.file 存起来，后续保存用
         filepath = result.file;
         originContent = result.content;
-        updateUserInterface();
+        updateUserInterface(isEdit);
     }
 });
+
 const rendererMarkdownToHTML = (markdown) => {
     htmlView.innerHTML = window.electronAPI.parseMarkdown(markdown);
-}
-const updateUserInterface = async () => {
-    if (filepath) {
-        await window.electronAPI.setTitle();
-    }
+};
 
-}
+const updateUserInterface = async (isEdit) => {
+    if (filepath) {
+        await window.electronAPI.setTitle(filepath, isEdit);
+    }
+};
