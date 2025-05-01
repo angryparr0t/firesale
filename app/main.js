@@ -117,7 +117,7 @@ ipcMain.handle("set-title", (event, filepath, isEdit) => {
     } else {
         title = filepath ? `${path.basename(filepath)}-FireSale` : 'FireSale';
     }
-    const currentWindow = BrowserWindow.getAllWindows()[0];
+    const currentWindow = BrowserWindow.fromWebContents(event.sender);
     currentWindow.setTitle(title);
 });
 
