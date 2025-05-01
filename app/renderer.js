@@ -14,6 +14,7 @@ const newFileButton = document.querySelector('#new-file');
 const openFileButton = document.querySelector('#open-file');
 const saveFileButton = document.querySelector('#save-file');
 const revertFileButton = document.querySelector('#revert-file');
+const saveHtmlButton = document.querySelector('#save-html');
 
 //监听markdown的变化
 markdownView.addEventListener('keyup', () => {
@@ -46,6 +47,21 @@ revertFileButton.addEventListener('click', () => {
     updateUserInterface(false);
 });
 
+// 监听文件打开事件
+window.electronAPI.on('file-opened', (event, data) => {
+    markdownView.value = data.content;
+    rendererMarkdownToHTML(data.content);
+    filepath = data.file;
+    originContent = data.content;
+    updateUserInterface(false);
+});
+
+//保存HTML
+saveHtmlButton.addEventListener('click', () => {
+    window.electronAPI.saveHtml(htmlView.innerHTML);
+});
+
+//渲染markdown到HTML
 const rendererMarkdownToHTML = (markdown) => {
     htmlView.innerHTML = window.electronAPI.parseMarkdown(markdown);
 };

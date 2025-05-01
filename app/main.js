@@ -30,6 +30,26 @@ app.on("activate", (event, hasVisibleWindows) => {
     }
 });
 
+app.on('will-finish-launching', () => {
+    app.on('open-file', async (event, file) => {
+        const win = createWindow();
+        win.once('ready-to-show', () => {
+            win.setRepresentedFilename(file);
+            filepath = file; // 保存文件路径
+            const content = fs.readFileSync(file).toString();
+
+            // 通过 IPC 通信将数据发送给渲染进程
+            win.webContents.on('did-finish-load', () => {
+                win.webContents.send('file-opened', {
+                    file,
+                    content
+                });
+            });
+
+            win.show();
+        });
+    });
+});
 // 打开文件
 const getFileFromUser = async (targetWindow) => {
     const {
@@ -94,10 +114,12 @@ const createWindow = () => {
 
 // 打开文件
 ipcMain.handle("open-file", async (event) => {
-    // ...你的 getFileFromUser 逻辑...
-    //console.log(event);
     const file = await getFileFromUser(event.sender);
     if (!file) return null;
+    const currentWindow = BrowserWindow.fromWebContents(event.sender);
+    if (process.platform === 'darwin') {
+        currentWindow.setRepresentedFilename(file);
+    }
     filepath = file; // 保存文件路径
     const content = fs.readFileSync(file).toString();
     return {
@@ -120,7 +142,22 @@ ipcMain.handle("set-title", (event, filepath, isEdit) => {
     const currentWindow = BrowserWindow.fromWebContents(event.sender);
     currentWindow.setTitle(title);
 });
-
+//保存HTML
+ipcMain.handle("save-html", async (event, html) => {
+    const currentWindow = BrowserWindow.fromWebContents(event.sender);
+    const {
+        filePath
+    } = await dialog.showSaveDialog(currentWindow, {
+        title: "保存HTML文件",
+        defaultPath: app.getPath('documents'),
+        filters: [{
+            name: "HTML",
+            extensions: ["html"]
+        }]
+    });
+    if (!filePath) return null;
+    fs.writeFileSync(filePath, html);
+});
 
 module.exports = {
     getFileFromUser,
