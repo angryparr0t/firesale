@@ -60,7 +60,10 @@ window.electronAPI.on('file-opened', (event, data) => {
 saveHtmlButton.addEventListener('click', () => {
     window.electronAPI.saveHtml(htmlView.innerHTML);
 });
-
+//保存markdown
+saveFileButton.addEventListener('click', () => {
+    window.electronAPI.saveMarkdown(markdownView.value);
+});
 //渲染markdown到HTML
 const rendererMarkdownToHTML = (markdown) => {
     htmlView.innerHTML = window.electronAPI.parseMarkdown(markdown);

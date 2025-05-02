@@ -158,6 +158,22 @@ ipcMain.handle("save-html", async (event, html) => {
     if (!filePath) return null;
     fs.writeFileSync(filePath, html);
 });
+//保存markdown
+ipcMain.handle("save-markdown", async (event, markdown) => {
+    const currentWindow = BrowserWindow.fromWebContents(event.sender);
+    const {
+        filePath
+    } = await dialog.showSaveDialog(currentWindow, {
+        title: "保存Markdown文件",
+        defaultPath: app.getPath('documents'),
+        filters: [{
+            name: "Markdown",
+            extensions: ["md", "markdown"]
+        }]
+    })
+    if (!filePath) return null;
+    fs.writeFileSync(filePath, markdown);
+});
 
 module.exports = {
     getFileFromUser,

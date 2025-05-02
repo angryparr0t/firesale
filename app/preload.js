@@ -12,5 +12,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     setTitle: (filepath, isEdit) => ipcRenderer.invoke("set-title", filepath, isEdit),
     parseMarkdown: (markdown) => marked.parse(markdown),
     on: (channel, func) => ipcRenderer.on(channel, func),
-    saveHtml: (html) => ipcRenderer.invoke("save-html", html)
+    saveHtml: (html) => ipcRenderer.invoke("save-html", html),
+    saveMarkdown: (markdown) => ipcRenderer.invoke("save-markdown", markdown)
 });
